@@ -1,1 +1,27 @@
 version: '3.7'
+
+services:
+
+  # NG Online Public Api
+  ngonlinepublicapi:
+    image: ${REGISTRY:-ows}/ngonlinepublicapi:${PLATFORM:-linux}-${TAG:-latest}
+    build:
+      context: .
+      dockerfile: NGOnlinePublicAPI/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=https://+:443;http://+:80
+      - OWSStorageConfig__OWSDBBackend=${DATABASE}
+      - OWSStorageConfig__OWSDBConnectionString=${DATABASE_CONNECTION_STRING}
+      - OWSAPIPathConfig__InternalPublicApiURL=${InternalPublicApiURL}
+      - OWSAPIPathConfig__InternalInstanceManagementApiURL=${InternalInstanceManagementApiURL}
+      - OWSAPIPathConfig__InternalCharacterPersistenceApiURL=${InternalCharacterPersistenceApiURL}
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
+    ports:
+      - "44992:80"
+      - "44993:443"
+    depends_on:
+      - database
+      - messaging
